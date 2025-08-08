@@ -1,0 +1,56 @@
+import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime
+
+# Replace with your OpenWeatherMap API key
+API_KEY = "48d9ace917f25214833591e5fa796ab7"
+CITY = 'Mumbai'
+API_URL = f'https://api.openweathermap.org/data/2.5/forecast?q={CITY}&appid={API_KEY}&units=metric'
+
+def fetch_weather_data():
+    response = requests.get(API_URL)
+    if response.status_code == 200:
+        return response.json()['list']
+    else:
+        print("Failed to fetch data:", response.status_code)
+        return []
+    def parse_weather_data(data):
+         dates, temps, humidities = [], [], []
+    for entry in data:
+        date = datetime.strptime(entry['dt_txt'], '%Y-%m-%d %H:%M:%S')
+        temp = entry['main']['temp']
+        humidity = entry['main']['humidity']
+        dates.append(date)
+        temps.append(temp)
+        humidities.append(humidity)
+    return dates, temps, humidities
+
+def visualize_weather(dates, temps, humidities):
+    sns.set(style="whitegrid")
+    plt.figure(figsize=(14, 6))
+
+    # Temperature plot
+    plt.subplot(1, 2, 1)
+    plt.plot(dates, temps, marker='o', color='tomato')
+    plt.title(f'Temperature Forecast for {CITY}')
+    plt.xlabel('Date and Time')
+    plt.ylabel('Temperature (°C)')
+    plt.xticks(rotation=45)
+
+    # Humidity plot
+    plt.subplot(1, 2, 2)
+    plt.plot(dates, humidities, marker='s', color='skyblue')
+    plt.title(f'Humidity Forecast for {CITY}')
+    plt.xlabel('Date and Time')
+    plt.ylabel('Humidity (%)')
+    plt.xticks(rotation=45)
+
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == '__main__':
+    data = fetch_weather_data()
+    if data:
+        dates, temps, humidities = parse_weather_data(data)
+        visualize_weather(dates, temps, humidities)
